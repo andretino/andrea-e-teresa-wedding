@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trova il tuo Tavolo – Andrea e Teresa</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="images/website/icon.png">
+
+    <!-- Custom CSS (pesca in automatico lo stesso style.css della pagina principale!) -->
+    <link href="style.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+
+    <!-- Stili aggiuntivi specifici per la sezione del Tableau -->
+    <style>
+        .tableau-section {
+            text-align: center;
+            padding: 4rem 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            font-family: 'Playfair Display', serif;
+        }
+        .tableau-section h2 {
+            font-family: 'Great Vibes', cursive;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        .tableau-section p {
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            color: #555;
+        }
+        .search-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        .search-box input {
+            padding: 12px 20px;
+            width: 100%;
+            max-width: 350px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 30px;
+            font-family: 'Playfair Display', serif;
+            text-align: center;
+        }
+        .search-box button {
+            padding: 12px 30px;
+            font-size: 1rem;
+            background-color: #8b9a8b; 
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: 'Playfair Display', serif;
+            transition: background-color 0.3s ease;
+        }
+        .search-box button:hover {
+            background-color: #6d7a6d;
+        }
+        #errorMsg {
+            color: #b56565;
+            margin-top: 1rem;
+            display: none;
+        }
+        #resultArea {
+            margin-top: 3rem;
+            display: none;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        #resultArea img {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .guest-list {
+            list-style: none;
+            padding: 0;
+            line-height: 2;
+            font-size: 1.1rem;
+        }
+        .guest-highlight {
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #8b9a8b;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ╭────────────────────────── Hero Section (Mantenuta uguale) ─────╮ -->
+    <section class="hero">
+        <img class="decor left" src="images/website/decor-1.png" alt="Watercolor flowers left">
+        <img class="decor right" src="images/website/decor-2.png" alt="Watercolor brush stroke right">
+
+        <p class="script">Ci sposiamo!</p>
+        <h1>
+            <span class="hero-name">ANDREA</span>
+            <span class="hero-amp">&amp;</span>
+            <span class="hero-name">TERESA</span>
+        </h1>
+        <p class="date">05.09.2026</p>
+        <div class="heart">&#10084;</div>
+    </section>
+    <!-- ╰──────────────────────────────────────────────────────────────╯ -->
+
+    <!-- ╭────────────────────── Tableau Search Section ────────────────────╮ -->
+    <section class="tableau-section">
+        <h2>Trova il tuo posto</h2>
+        <p>Inserisci il tuo nome e cognome per scoprire in quale tavolo sarai seduto.</p>
+
+        <div class="search-box">
+            <input type="text" id="guestName" placeholder="Es. Mario Rossi">
+            <button onclick="findTable()">Cerca Tavolo</button>
+        </div>
+        <p id="errorMsg">Nome non trovato. Prova a scrivere nome e cognome completi.</p>
+
+        <div id="resultArea">
+            <h3 id="tableTitle" style="margin-bottom: 1rem; font-size: 1.5rem;"></h3>
+            <img id="tableImage" src="" alt="Immagine Tavolo">
+            <h4>Al tuo tavolo ci saranno:</h4>
+            <ul class="guest-list" id="guestList"></ul>
+        </div>
+    </section>
+    <!-- ╰──────────────────────────────────────────────────────────────╯ -->
+
+    <!-- ╭────────────────────── Script Ricerca Tavoli ─────────────────────╮ -->
+    <script>
+        // Array coi nomi puliti dal (C)
+        const tables = [
+            { name: "Tavolo 1 - Ticket to Ride", img: "1.jpg", guests: ["Andrea Mattino", "Teresa Rizzi", "Andrea Menci", "Giulia Pontoglio", "Daniele Passabì", "Chiara Callegari", "Daniele Bocchino", "Nicol Checchi", "Sonia Leoni"] },
+            { name: "Tavolo 2 - Exploding Kittens", img: "2.jpg", guests: ["Alessio Marcone", "Gloria Scarpazza", "Marco Vitale", "Alessia Liberti", "Martino Pozza", "Nerea Asensio", "Federico Checchi", "Martina Pozzi"] },
+            { name: "Tavolo 3 - Catan", img: "3.jpg", guests: ["Andrea Parodi", "Anna Vianello", "Enrico Previti", "Martina Cancellieri", "Michele Praolini", "Orsetta Mangiante", "Giacomo Bellinzoni"] },
+            { name: "Tavolo 4 - Taboo", img: "4.jpg", guests: ["Giuseppe De Luca", "Mayra Venancio", "Lorenzo Mattino", "Raffaela Zorloni", "Luciano Mattino", "Anna Buzzini", "Rita Dotti"] },
+            { name: "Tavolo 5 - Pictionary", img: "5.jpg", guests: ["G. Paolo Rizzi", "Carmen Colella", "Marco Parravicini", "Irene Rizzi", "Marco Rizzi", "Clara Roncaglioni", "Evelina Franco"] },
+            { name: "Tavolo 6 - Dixit", img: "6.jpg", guests: ["Charles Dike", "Mariakarla Nodarse", "Gabriele Paredi", "Valentina Mattino", "Mattia Mattino", "Beatrice Paredi", "Simone Mattino", "Maddalena Vanossi", "Sibilla Paredi"] },
+            { name: "Tavolo 7 - Monopoly", img: "7.jpg", guests: ["Luca Buzzini", "Arianna Corti", "Riccardo Buzzini", "Irene Buzzini", "Stefano Buzzini", "Marinella Mauri"] },
+            { name: "Tavolo 8 - Scarabeo", img: "8.jpg", guests: ["Elia Parravicini", "Gemma Parravicini", "Giacomo Parravicini", "Marta Rizzi", "Matteo Martinelli", "Camilla Rizzi", "Robin Roeske", "Arianna Rizzi", "Michela Rizzi"] },
+            { name: "Tavolo 9 - Forza Quattro", img: "9.jpg", guests: ["Francesco Mazzetti", "Gemma Grasso", "Gabriele Biagioli", "Francesca Grasso", "Roberto Mazzetti", "Gabriella Colella", "Emiliana Colella"] }
+        ];
+
+        // Funzione per normalizzare le stringhe: minuscolo e divisione in parole
+        function normalizeString(str) {
+            return str.toLowerCase().trim().split(/\s+/);
+        }
+
+        function findTable() {
+            const input = document.getElementById('guestName').value;
+            const errorMsg = document.getElementById('errorMsg');
+            const resultArea = document.getElementById('resultArea');
+            
+            errorMsg.style.display = 'none';
+            resultArea.style.display = 'none';
+
+            if (!input.trim()) return;
+
+            const inputParts = normalizeString(input);
+            let foundTable = null;
+            let foundGuestName = "";
+
+            // Ricerca flessibile: non importa maiuscole, minuscole o l'ordine di nome/cognome
+            for (const table of tables) {
+                for (const guest of table.guests) {
+                    const guestParts = normalizeString(guest);
+                    
+                    const isMatch = inputParts.every(part => 
+                        guestParts.some(gPart => gPart.includes(part))
+                    );
+
+                    if (isMatch) {
+                        foundTable = table;
+                        foundGuestName = guest;
+                        break;
+                    }
+                }
+                if (foundTable) break;
+            }
+
+            if (foundTable) {
+                document.getElementById('tableTitle').innerText = foundTable.name;
+                document.getElementById('tableImage').src = foundTable.img; 
+                
+                const ul = document.getElementById('guestList');
+                ul.innerHTML = ''; 
+
+                foundTable.guests.forEach(guest => {
+                    const li = document.createElement('li');
+                    li.innerText = guest;
+                    // Mette in risalto l'utente trovato
+                    if (guest === foundGuestName) {
+                        li.classList.add('guest-highlight');
+                    }
+                    ul.appendChild(li);
+                });
+
+                resultArea.style.display = 'block';
+            } else {
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        // Cerca anche premendo "Invio"
+        document.getElementById('guestName').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                findTable();
+            }
+        });
+    </script>
+    <!-- ╰──────────────────────────────────────────────────────────────╯ -->
+
+</body>
+</html>
